@@ -1061,17 +1061,17 @@ static int do_swap_page(struct mm_struct * mm,
 static int do_anonymous_page(struct mm_struct * mm, struct vm_area_struct * vma, pte_t *page_table, int write_access, unsigned long addr)
 {
 	struct page *page = NULL;
-	pte_t entry = pte_wrprotect(mk_pte(ZERO_PAGE(addr), vma->vm_page_prot));
-	if (write_access) {
+	pte_t entry = pte_wrprotect(mk_pte(ZERO_PAGE(addr), vma->vm_page_prot));    //设置物理页面只读
+	if (write_access) { //只读页面通过ZERO_PAGE映射，可写的页面才通过alloc_page分配
 		page = alloc_page(GFP_HIGHUSER);
 		if (!page)
 			return -1;
 		clear_user_highpage(page, addr);
-		entry = pte_mkwrite(pte_mkdirty(mk_pte(page, vma->vm_page_prot)));
+		entry = pte_mkwrite(pte_mkdirty(mk_pte(page, vma->vm_page_prot)));  //设置物理页面可写
 		mm->rss++;
 		flush_page_to_ram(page);
 	}
-	set_pte(page_table, entry);
+	set_pte(page_table, entry);     //设置PTE页表所指的页表项的值
 	/* No need to invalidate - it was non-present before */
 	update_mmu_cache(vma, addr, entry);
 	return 1;	/* Minor fault */
@@ -1196,8 +1196,8 @@ int handle_mm_fault(struct mm_struct *mm, struct vm_area_struct * vma,
 	pgd_t *pgd;
 	pmd_t *pmd;
 
-	pgd = pgd_offset(mm, address);
-	pmd = pmd_alloc(pgd, address);
+	pgd = pgd_offset(mm, address);  //计算该地址所属页面目录项指针
+	pmd = pmd_alloc(pgd, address);  //使用二级页表，pmd = (pmd_t *)pgd;
 
 	if (pmd) {
 		pte_t * pte = pte_alloc(pmd, address);

@@ -360,7 +360,7 @@ struct task_struct {
 	int keep_capabilities:1;
 	struct user_struct *user;
 /* limits */
-	struct rlimit rlim[RLIM_NLIMITS];
+	struct rlimit rlim[RLIM_NLIMITS];   //对进程资源分配的限制
 	unsigned short used_math;
 	char comm[16];
 /* file system info */

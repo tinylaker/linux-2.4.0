@@ -65,7 +65,7 @@ static int __do_page_fault(struct mm_struct *mm, unsigned long addr, int mode, s
 	struct vm_area_struct *vma;
 	int fault, mask;
 
-	vma = find_vma(mm, addr);
+	vma = find_vma(mm, addr);   //判断映射地址是否在进程的虚拟空间
 	fault = -2; /* bad map area */
 	if (!vma)
 		goto out;
@@ -82,7 +82,7 @@ good_area:
 	else
 		mask = VM_WRITE;
 
-	fault = -1; /* bad access type */
+	fault = -1; /* bad access type */  
 	if (!(vma->vm_flags & mask))
 		goto out;
 
@@ -92,7 +92,7 @@ good_area:
 	 * than endlessly redo the fault.
 	 */
 survive:
-	fault = handle_mm_fault(mm, vma, addr & PAGE_MASK, DO_COW(mode));
+	fault = handle_mm_fault(mm, vma, addr & PAGE_MASK, DO_COW(mode));   //写时复制
 
 	/*
 	 * Handle the "normal" cases first - successful and sigbus
@@ -120,7 +120,7 @@ survive:
 	goto survive;
 
 check_stack:
-	if (vma->vm_flags & VM_GROWSDOWN && !expand_stack(vma, addr))
+	if (vma->vm_flags & VM_GROWSDOWN && !expand_stack(vma, addr))   //是否在堆栈区域，扩展进程的用户堆栈
 		goto good_area;
 out:
 	return fault;
@@ -178,18 +178,18 @@ static int do_page_fault(unsigned long addr, int mode, struct pt_regs *regs)
 	 * only copy the information from the master page table,
 	 * nothing more.
 	 */
-	if (addr >= TASK_SIZE)
+	if (addr >= TASK_SIZE)  //对内核空间的访问
 		goto vmalloc_fault;
 
 	/*
 	 * If we're in an interrupt or have no user
 	 * context, we must not take the fault..
 	 */
-	if (in_interrupt() || !mm)
+	if (in_interrupt() || !mm)  //检测是否在中断中或者内核线程中访问用户空间
 		goto no_context;
 
 	down(&mm->mmap_sem);
-	fault = __do_page_fault(mm, addr, mode, tsk);
+	fault = __do_page_fault(mm, addr, mode, tsk);   //检测缺页地址是否包含在进程虚拟空间
 	up(&mm->mmap_sem);
 
 ret:
@@ -288,6 +288,7 @@ no_context:
 	return 0;
 
 vmalloc_fault:
-	fault = __do_vmalloc_fault(addr, mm);
+	fault = __do_vmalloc_fault(addr, mm);   //进程访问内核空间vmalloc映射的地址引发的异常
+    //需要将内核的页目录项，页中间项的映射关系拷贝到进程的页目录项和页表中
 	goto ret;
 }

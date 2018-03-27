@@ -150,13 +150,13 @@ extern __inline__ pte_t * pte_alloc_kernel(pmd_t *pmd, unsigned long address)
 
 extern __inline__ pte_t *pte_alloc(pmd_t * pmd, unsigned long address)
 {
-	address = (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);
+	address = (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);     //将地址转换成对应页表的下表  | PGD | PTE | INDEX | 
 	if (pmd_none(*pmd)) {
-		pte_t *page = (pte_t *) get_pte_fast();
+		pte_t *page = (pte_t *) get_pte_fast();     //页面表缓冲池获取
 
 		if (!page)
-			return get_pte_slow(pmd, address);
-		set_pmd(pmd, mk_user_pmd(page));
+			return get_pte_slow(pmd, address);  //分配物理页面
+		set_pmd(pmd, mk_user_pmd(page));    //实际写入页面目录项pgd中
 		return page + address;
 	}
 	if (pmd_bad(*pmd)) {

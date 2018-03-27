@@ -933,12 +933,12 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 	vmp->vm_next = *pprev;
 	*pprev = vmp;
 
-	mm->map_count++;
+	mm->map_count++;    //增加虚存空间的计算，当达到32个时，需要构建VAL树以提高效率
 	if (mm->map_count >= AVL_MIN_MAP_COUNT && !mm->mmap_avl)
 		build_mmap_avl(mm);
 
 	file = vmp->vm_file;
-	if (file) {
+	if (file) { 
 		struct inode * inode = file->f_dentry->d_inode;
 		struct address_space *mapping = inode->i_mapping;
 		struct vm_area_struct **head;
@@ -960,8 +960,8 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 
 void insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 {
-	lock_vma_mappings(vmp);
-	spin_lock(&current->mm->page_table_lock);
+	lock_vma_mappings(vmp); //代表新区间的虚存空间
+	spin_lock(&current->mm->page_table_lock);   //代表整个虚存空间的mm_struct
 	__insert_vm_struct(mm, vmp);
 	spin_unlock(&current->mm->page_table_lock);
 	unlock_vma_mappings(vmp);

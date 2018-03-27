@@ -40,11 +40,11 @@ extern struct list_head inactive_dirty_list;
  */
 struct vm_area_struct {
 	struct mm_struct * vm_mm;	/* VM area parameters */
-	unsigned long vm_start;
-	unsigned long vm_end;
+	unsigned long vm_start;     //包含在区间内
+	unsigned long vm_end;   //不包含在区间内
 
 	/* linked list of VM areas per task, sorted by address */
-	struct vm_area_struct *vm_next;
+	struct vm_area_struct *vm_next;     //进程虚拟内存组成的链表,按照地址大小排序
 
 	pgprot_t vm_page_prot;
 	unsigned long vm_flags;
@@ -134,7 +134,7 @@ struct vm_operations_struct {
 typedef struct page {
 	struct list_head list;
 	struct address_space *mapping;
-	unsigned long index;
+	unsigned long index;    //当来自文件时，表示该页面在文件中的序号;当页面被换出时，指明页表的去向
 	struct page *next_hash;
 	atomic_t count;
 	unsigned long flags;	/* atomic flags, some possibly updated asynchronously */

@@ -26,7 +26,7 @@ typedef struct zone_struct {
 	 * Commonly accessed fields:
 	 */
 	spinlock_t		lock;
-	unsigned long		offset;
+	unsigned long		offset;     //该分区在mem_map中的起始页面偏移
 	unsigned long		free_pages;
 	unsigned long		inactive_clean_pages;
 	unsigned long		inactive_dirty_pages;
@@ -46,7 +46,7 @@ typedef struct zone_struct {
 	/*
 	 * Discontig memory support fields.
 	 */
-	struct pglist_data	*zone_pgdat;
+	struct pglist_data	*zone_pgdat;    //指向所属内存节点的pglist_data数据 
 	unsigned long		zone_start_paddr;
 	unsigned long		zone_start_mapnr;
 	struct page		*zone_mem_map;
@@ -77,16 +77,16 @@ typedef struct zonelist_struct {
 
 struct bootmem_data;
 typedef struct pglist_data {
-	zone_t node_zones[MAX_NR_ZONES];
-	zonelist_t node_zonelists[NR_GFPINDEX];
-	struct page *node_mem_map;
+	zone_t node_zones[MAX_NR_ZONES];    //该内存节点支持的最多三个页面管理区域
+	zonelist_t node_zonelists[NR_GFPINDEX];     //内存节点的分配策略
+	struct page *node_mem_map;  //指向该节点的page结构数组
 	unsigned long *valid_addr_bitmap;
 	struct bootmem_data *bdata;
 	unsigned long node_start_paddr;
 	unsigned long node_start_mapnr;
 	unsigned long node_size;
 	int node_id;
-	struct pglist_data *node_next;
+	struct pglist_data *node_next;  //所有内存节点的单链表队列
 } pg_data_t;
 
 extern int numnodes;
