@@ -147,19 +147,19 @@ void __swap_free(swp_entry_t entry, unsigned short count)
 	struct swap_info_struct * p;
 	unsigned long offset, type;
 
-	if (!entry.val)
+	if (!entry.val) //任何页面交换设备或文件中的页面0不用于页面交换
 		goto out;
 
-	type = SWP_TYPE(entry);
+	type = SWP_TYPE(entry); //返回实际的页面交换设备的序号
 	if (type >= nr_swapfiles)
 		goto bad_nofile;
-	p = & swap_info[type];
+	p = & swap_info[type];  //获取具体文件的swap_info_struct结构，通过swap_on()加入链表
 	if (!(p->flags & SWP_USED))
 		goto bad_device;
-	offset = SWP_OFFSET(entry);
+	offset = SWP_OFFSET(entry); //页面在文件中的位置
 	if (offset >= p->max)
 		goto bad_offset;
-	if (!p->swap_map[offset])
+	if (!p->swap_map[offset])   //表明该页面的分配计数
 		goto bad_free;
 	swap_list_lock();
 	if (p->prio > swap_info[swap_list.next].prio)
@@ -168,7 +168,8 @@ void __swap_free(swp_entry_t entry, unsigned short count)
 	if (p->swap_map[offset] < SWAP_MAP_MAX) {
 		if (p->swap_map[offset] < count)
 			goto bad_count;
-		if (!(p->swap_map[offset] -= count)) {
+		if (!(p->swap_map[offset] -= count)) {  //count表示有几个使用者释放该页面
+            /* 调整可供分配页面的范围和数量，并不涉及磁盘相关操作 */
 			if (offset < p->lowest_bit)
 				p->lowest_bit = offset;
 			if (offset > p->highest_bit)
